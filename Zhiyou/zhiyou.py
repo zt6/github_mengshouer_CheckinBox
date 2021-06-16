@@ -32,7 +32,7 @@ def run(*args):
     url = "http://bbs.zhiyoo.net/plugin.php?id=dsu_paulsign:sign&operation=qiandao&infloat=1&inajax=1"
     payload=f'formhash={formhash}&qdxq=yl'
     r = s.post(url, data=payload, verify=False, timeout=120)
-    # print(r.text)
+    print(r.text)
     if '成功' in r.text:
         msg += re.compile(r'恭喜你签到成功!获得随机奖励 金币 \d+ 元.').search(r.text)[0]
     elif '已经签到' in r.text:
@@ -45,18 +45,23 @@ def run(*args):
 def main(*args):
     msg = ""
     global cookie
-    if "\\n" in cookie:
-        clist = cookie.split("\\n")
-    else:
-        clist = cookie.split("\n")
-    i = 0
-    while i < len(clist):
-        msg += f"第 {i+1} 个账号开始执行任务\n"
-        cookie = clist[i]
-        msg += run(cookie)
-        i += 1
-    print(msg[:-1])
-    return msg[:-1]
+    namelist = ["cookie"]
+    if len(args):
+        for i in range(0, len(args)-1):
+            namelist[i] = args[i]
+    if cookie:
+        if "\\n" in cookie:
+            clist = cookie.split("\\n")
+        else:
+            clist = cookie.split("\n")
+        i = 0
+        while i < len(clist):
+            msg += f"第 {i+1} 个账号开始执行任务\n"
+            cookie = clist[i]
+            msg += run(cookie)
+            i += 1
+        print(msg[:-1])
+        return msg[:-1]
 
 
 if __name__ == "__main__":

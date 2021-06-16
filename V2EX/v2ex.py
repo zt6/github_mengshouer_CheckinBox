@@ -8,7 +8,7 @@ except:
 
 cookie = os.environ.get("cookie_v2ex")
 
-def run(*arg):
+def run(*args):
     msg = ""
     s = requests.Session()
     s.headers.update({'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.150 Safari/537.36'})
@@ -51,24 +51,30 @@ def run(*arg):
         return msg
     else:
         msg = '签到失败！\n'
+        print(sign.text)
         pusher("V2EX  签到失败！！！", sign.text[:200])
     return msg
 
-def main(*arg):
+def main(*args):
     msg = ""
     global cookie
-    if "\\n" in cookie:
-        clist = cookie.split("\\n")
-    else:
-        clist = cookie.split("\n")
-    i = 0
-    while i < len(clist):
-        msg += f"第 {i+1} 个账号开始执行任务\n"
-        cookie = clist[i]
-        msg += run(cookie)
-        i += 1
-    print(msg[:-1])
-    return msg[:-1]
+    namelist = ["cookie"]
+    if len(args):
+        for i in range(0, len(args)-1):
+            namelist[i] = args[i]
+    if cookie:
+        if "\\n" in cookie:
+            clist = cookie.split("\\n")
+        else:
+            clist = cookie.split("\n")
+        i = 0
+        while i < len(clist):
+            msg += f"第 {i+1} 个账号开始执行任务\n"
+            cookie = clist[i]
+            msg += run(cookie)
+            i += 1
+        print(msg[:-1])
+        return msg[:-1]
 
 
 if __name__ == "__main__":
