@@ -14,26 +14,39 @@ pt_website = os.environ.get("pt_website")
 def main(cookie, website):
     try:
         s = requests.Session()
+        s.headers.update({'User-Agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.131 Safari/537.36'})
         url = f'{website}?action=addbonus'
 
         headers = {
             'User-Agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.131 Safari/537.36',
-            "Cookie" : cookie,
-            'Referer': website
+            'Cookie' : cookie,
+            'Content-type': 'text/html; charset=utf-8; Cache-control:private',
+            'Referer': website,
             }
 
         r = s.get(url, headers=headers, verify=False)
-        award = re.match(r'今天签到您获得\d+点魔力值', r.text)
+        award = re.compile(r'今天签到您获得\d+点魔力值').search(r.text)
         if award:
-            msg = award.group(1)
+            msg = award.group(0)
         elif not award and "欢迎回来" in r.text:
             msg = "已经签到过了！"
+        elif 'value="每日打卡"' in r.text:
+            award = re.compile(r'恭喜您,获得了\d+魔力值奖励!').search(r.text)
+            url = website.replace('index.php', 'signin.php')
+            r = s.get(url, headers=headers, verify=False)
+            if award:
+                msg = award.group(0)
+            elif 'value="已经打卡"' in r.text:
+                msg = "已经签到过了！"
+            else:
+                msg = f"PT站点{website} Cookie过期"
+                pusher(f"PT站点{website} Cookie过期", r.text[:200])
         else:
             msg = f"PT站点{website} Cookie过期"
             pusher(f"PT站点{website} Cookie过期", r.text[:200])
     except Exception as e:
+        print('repr(e):', repr(e))
         msg = '运行出错,repr(e):'+repr(e)
-        pusher(f"PT站点{website} 运行出错", msg)
     return msg + "\n"
 
 def main_handler(*args):
