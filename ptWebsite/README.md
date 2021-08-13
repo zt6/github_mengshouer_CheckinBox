@@ -7,8 +7,8 @@ Github Actions版本<br>
 <br>
 [腾讯云函数SCF](https://console.cloud.tencent.com/scf/index)的版本<br>
 1.下载requirements.zip所需库，到[层](https://console.cloud.tencent.com/scf/layer)里面新建一个层<br>
-2.到[函数服务](https://console.cloud.tencent.com/scf/list)里面新建一个函数，使用自定义创建，输入名字，运行环境选择python3.6，下一步<br>
-3.修改index.py文件，复制仓库脚本内容覆盖原来的index.py
+2.到[函数服务](https://console.cloud.tencent.com/scf/list)里面新建一个函数，使用自定义创建，输入名字，运行环境选择python3.6<br>
+3.修改index.py文件，复制仓库脚本内容覆盖原来的index.py<br>
 4.高级设置，添加多个环境变量key内输入：1.pt_website 2.cookie_pt 3.推送服务设置值(可选)<br>
 value内输入：1.需要签到的PT站点(例如https://xxx.xxx/index.php) 2.获取到的cookie 3.推送服务设置值(可选)<br>
 5.层配置，添加层，选择刚才新建的层。最后点完成<br>

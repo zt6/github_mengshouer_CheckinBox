@@ -10,8 +10,8 @@ Github Actions版本<br>
 [腾讯云函数SCF](https://console.cloud.tencent.com/scf/index)的版本<br>
 PS.目前腾讯云SCF的ip段大概都被52pj封的差不多了，要用的话还是推荐使用Github Actions版本<br>
 1.下载requirements.zip所需库，到[层](https://console.cloud.tencent.com/scf/layer)里面新建一个层<br>
-2.到[函数服务](https://console.cloud.tencent.com/scf/list)里面新建一个函数，输入名字，运行环境选择python3.6，选择空白模板，下一步<br>
-3.修改执行方法为index.pjCheckin，修改index.py文件，把SCF版py文件内容覆盖掉里面的函数，删除config.json<br>
+2.到[函数服务](https://console.cloud.tencent.com/scf/list)里面新建一个函数，使用自定义创建，输入名字，运行环境选择python3.6<br>
+3.修改执行方法为index.pjCheckin，修改index.py文件，把SCF版py文件内容覆盖掉里面的函数<br>
 5.高级设置，添加多个环境变量key内输入：1.cookie_52pj 2.推送服务设置值(可选)<br>
 value内输入：1.获取到的cookie 2.Server酱推送SCKEY,报错提醒<br>
 如果需要自动免费评分的话,新增一个key填写rate_52pj，value 随便填个1就行(非0都行)<br>
