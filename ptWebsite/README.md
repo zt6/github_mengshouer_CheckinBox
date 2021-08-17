@@ -19,7 +19,6 @@ value内输入：1.需要签到的PT站点(例如https://xxx.xxx/index.php) 2.�
 在 Chrome 浏览器下方的开发工具中单击 Network 标签页(其他浏览器大同小异)<br>
 F5刷新当前网站，随便选一个Name里面的网页，在右侧Headers内找到Cookie: xxxxxx，复制xxxx的东西，一般很长一大串<br>
 Headers如果没有Cookie就换另一个Name里面的网页，实在看不懂就自行baidu吧.jpg<br>
-Cookie过期就必须手动更换，再重复一次获取流程，然后Github到secrets里更新，腾讯云函数就到函数配置中修改环境变量的值
+Cookie过期就必须手动更换，再重复一次获取流程，然后Github到secrets里更新，腾讯云函数就到函数配置中修改环境变量的值<br>
 
-### ToDo<br>
-1.投票 2.说谢谢
+PS. 只提供签到的使用方法(保号够用了)，其他的避免滥用，需要使用自行研究使用方法。
