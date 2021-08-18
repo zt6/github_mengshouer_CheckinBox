@@ -6,7 +6,8 @@ requests.packages.urllib3.disable_warnings()
 try:
     from pusher import pusher
 except:
-    pass
+    def pusher(*args):
+        pass
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from cryptography.hazmat.backends import default_backend
 

@@ -4,7 +4,8 @@ requests.packages.urllib3.disable_warnings()
 try:
     from pusher import pusher
 except:
-    pass
+    def pusher(*args):
+        pass
 from lxml import etree
 
 cookie = os.environ.get("cookie_enshan")

@@ -6,7 +6,8 @@ requests.packages.urllib3.disable_warnings()
 try:
     from pusher import pusher
 except:
-    pass
+    def pusher(*args):
+        pass
 from bs4 import BeautifulSoup
 
 cookie = os.environ.get('cookie_52pj')
