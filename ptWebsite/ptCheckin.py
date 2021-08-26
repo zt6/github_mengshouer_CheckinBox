@@ -37,11 +37,11 @@ def main(cookie, website):
             r = s.get(url, headers=headers, verify=False)
             if award:
                 msg = award.group(0)
-            elif 'value="已经打卡"' in r.text:
-                msg = "已经签到过了！"
             else:
                 msg = f"PT站点{website} Cookie过期"
                 pusher(f"PT站点{website} Cookie过期", r.text[:200])
+        elif 'value="已经打卡"' in r.text:
+            msg = "已经签到过了！"
         else:
             msg = f"PT站点{website} Cookie过期"
             pusher(f"PT站点{website} Cookie过期", r.text[:200])
