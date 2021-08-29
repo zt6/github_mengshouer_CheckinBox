@@ -70,8 +70,8 @@ def run(*args):
             print("登录成功！")
             msg += "登录成功！,"
         else:
-            print("登录失败！请检查密码是否正确！"+str(object['code']))
-            return "登录失败！请检查密码是否正确！"
+            print("登录失败！请检查密码是否正确！"+str(object))
+            return f"登录失败！请检查密码是否正确！{object}"
 
         res=s.post(url=url2,data=protect('{"type":0}'),headers=headers)
         object=json.loads(res.text)
