@@ -1,11 +1,18 @@
 import requests, sys, json, time, hashlib, os, sys
 sys.path.append('.')
 requests.packages.urllib3.disable_warnings()
+import logging
+logging.basicConfig(level=logging.INFO, format='%(message)s')
+logger = logging.getLogger(__name__)
 try:
     from pusher import pusher
 except:
     def pusher(*args):
         pass
+try:
+    from notify import send as pusher
+except:
+    logger.info("无青龙推送文件")
 
 s = requests.Session()
 
@@ -38,7 +45,7 @@ def checkin(YNOTE_SESS):
             msg = "未设置账号密码并且cookie过期"
         return msg
     else:
-        pusher("有道云笔记签到出现未知错误", r.text[:200])
+        pusher("Checkinbox通知", f"有道云笔记签到出现未知错误{r.text[:200]}")
         return r.text
 
 def login(username, password):
@@ -57,19 +64,19 @@ def login(username, password):
     if x.__len__() == 0:
         YNOTE_SESS = "-1"
         msg = f" {username} 有道云登录失败"
-        print(msg)
-        pusher(msg, r.text[:200])
+        pusher("Checkinbox通知", f"{msg}\n{r.text[:200]}")
         return ""
     else:
-        print(f'{username} 登陆成功，更新YNOTE_SESS,重新签到')
+        logger.info(f'{username} 登陆成功，更新YNOTE_SESS,重新签到')
         YNOTE_SESS = x[0]
         # 尝试更新cookie到config.json
         try:
+            global user_dict
             user_dict[f"{username}"] = YNOTE_SESS
             with open('./config.json', 'w', encoding="utf8") as f:
                 json.dump(user_dict, f, ensure_ascii=False)
         except:
-            print("无法写入config.json ,pass")
+            logger.info("有道云笔记无法写入config.json ,pass")
         return YNOTE_SESS
 
 
@@ -79,9 +86,8 @@ def main(*args):
             data = json.load(f)
             msg = check(data)
     except:
-        data = ""
+        data = {}
         msg = check(data)
-    print(msg)
     return msg
 
 def check(data):
@@ -110,7 +116,6 @@ def check(data):
                 i += 1
         else:
             msg = "账号密码个数不相符"
-            print(msg)
         return msg
     else:
         c = 0
@@ -130,6 +135,6 @@ def check(data):
 
 if __name__ == '__main__':
     if note_username and note_password:
-        print("----------有道云笔记开始尝试签到----------")
-        main()
-        print("----------有道云笔记签到执行完毕----------")
+        logger.info("----------有道云笔记开始尝试签到----------")
+        logger.info(main())
+        logger.info("----------有道云笔记签到执行完毕----------")

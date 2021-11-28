@@ -3,13 +3,20 @@
 import requests, base64, json, hashlib, os, sys
 sys.path.append('.')
 requests.packages.urllib3.disable_warnings()
+from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
+from cryptography.hazmat.backends import default_backend
+import logging
+logging.basicConfig(level=logging.INFO, format='%(message)s')
+logger = logging.getLogger(__name__)
 try:
     from pusher import pusher
 except:
     def pusher(*args):
         pass
-from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
-from cryptography.hazmat.backends import default_backend
+try:
+    from notify import send as pusher
+except:
+    logger.info("无青龙推送文件")
 
 netease_username = os.environ.get("netease_username")
 netease_password = os.environ.get("netease_password")
@@ -67,24 +74,24 @@ def run(*args):
         tempcookie=res.cookies
         object=json.loads(res.text)
         if object['code']==200:
-            print("登录成功！")
+            logger.info("登录成功！")
             msg += "登录成功！,"
         else:
-            print("登录失败！请检查密码是否正确！"+str(object))
+            logger.info("登录失败！请检查密码是否正确！"+str(object))
             return f"登录失败！请检查密码是否正确！{object}"
 
         res=s.post(url=url2,data=protect('{"type":0}'),headers=headers)
         object=json.loads(res.text)
         if object['code']!=200 and object['code']!=-2:
-            print("签到时发生错误："+object['msg'])
+            logger.info("签到时发生错误："+object['msg'])
             msg += "签到时发生错误,"
-            pusher("网易云音乐签到时发生错误", object['msg'][:200])
+            pusher("Checkinbox通知", f"网易云音乐签到时发生错误{object['msg'][:200]}")
         else:
             if object['code']==200:
-                print("签到成功，经验+"+str(object['point']))
+                logger.info("签到成功，经验+"+str(object['point']))
                 msg += "签到成功,"
             else:
-                print("重复签到")
+                logger.info("重复签到")
                 msg += "重复签到,"
 
 
@@ -126,15 +133,15 @@ def run(*args):
         object=json.loads(res.text,strict=False)
         if object['code']==200:
             text = "刷单成功！共"+str(count)+"首"
-            print(text)
+            logger.info(text)
             msg += text
         else:
             text = "发生错误："+str(object['code'])+object['message']
-            print(text)
+            logger.info(text)
             msg += text
-            pusher("网易云音乐刷歌单时发生错误", object['message'][:200])
+            pusher("Checkinbox通知", f"网易云音乐刷歌单时发生错误{object['message'][:200]}")
     except Exception as e:
-        print('repr(e):', repr(e))
+        logger.info('repr(e):', repr(e))
         msg += '运行出错,repr(e):'+repr(e)
     return msg + "\n"
 
@@ -157,12 +164,12 @@ def main(*args):
             i += 1
     else:
         msg = "账号密码个数不相符"
-        print(msg)
+        logger.info(msg)
     return msg
 
 
 if __name__ == "__main__":
     if netease_username and netease_password:
-        print("----------网易云音乐开始尝试执行日常任务----------")
+        logger.info("----------网易云音乐开始尝试执行日常任务----------")
         main()
-        print("----------网易云音乐日常任务执行完毕----------")
+        logger.info("----------网易云音乐日常任务执行完毕----------")

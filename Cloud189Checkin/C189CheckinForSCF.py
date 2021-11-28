@@ -3,15 +3,22 @@
 import requests, time, re, rsa, json, base64, os, sys
 sys.path.append('.')
 requests.packages.urllib3.disable_warnings()
+from urllib import parse
+import logging
+logging.basicConfig(level=logging.INFO, format='%(message)s')
+logger = logging.getLogger(__name__)
 try:
     from pusher import pusher
 except:
     def pusher(*args):
         pass
-from urllib import parse
+try:
+    from notify import send as pusher
+except:
+    logger.info("无青龙推送文件")
 
-username = os.environ.get('username')
-password = os.environ.get('password')
+username = os.environ.get('username_c189')
+password = os.environ.get('password_c189')
 
 def main(username:str, password:str):
     try:
@@ -48,7 +55,7 @@ def main(username:str, password:str):
                 msg += "内部错误，可能是活动下线,"
             else:
                 msg += "第一次抽奖出错\n" + response.text
-                pusher("第一次抽奖出错", response.text[:200])
+                pusher("Checkinbox通知", f"天翼云盘第一次抽奖出错\n{response.text[:200]}")
         else:
             try:
                 description = response.json()['description']
@@ -65,7 +72,7 @@ def main(username:str, password:str):
                 msg += "内部错误，可能是活动下线,"
             else:
                 msg += "第二次抽奖出错\n" + response.text
-                pusher("第二次抽奖出错", response.text[:200])
+                pusher("Checkinbox通知", f"天翼云盘第二次抽奖出错\n{response.text[:200]}")
         else:
             try:
                 description = response.json()['description']
@@ -73,7 +80,7 @@ def main(username:str, password:str):
                 description = "未知"
             msg += f"抽奖获得  {description}  ,"
     except Exception as e:
-        pusher("天翼云签到出错", repr(e))
+        pusher("Checkinbox通知", f"天翼云签到出错{repr(e)}")
         msg += "天翼云签到出错："+repr(e)
     return msg + "\n"
 
@@ -148,12 +155,12 @@ def login(username, password):
         }
     r = s.post(url, data=data, headers=headers, timeout=5)
     if(r.json()['result'] == 0):
-        # print(r.json()['msg'])
+        # logger.info(r.json()['msg'])
         pass
     else:
         msg = r.json()['msg']
-        print(msg)
-        pusher("天翼云盘登录出错", f"错误提示：{msg[:200]}")
+        logger.info(msg)
+        pusher("Checkinbox通知", "天翼云盘登录出错", f"错误提示：{msg[:200]}")
         return "error"
     redirect_url = r.json()['toUrl']
     r = s.get(redirect_url)
@@ -178,11 +185,11 @@ def C189Checkin(*args):
             i += 1
     else:
         msg = "账号密码个数不相符\n"
-    print(msg[:-1])
+    logger.info(msg[:-1])
     return msg
 
 if __name__ == "__main__":
     if username and password:
-        print("----------天翼云盘开始尝试签到----------")
+        logger.info("----------天翼云盘开始尝试签到----------")
         C189Checkin()
-        print("----------天翼云盘签到执行完毕----------")
+        logger.info("----------天翼云盘签到执行完毕----------")

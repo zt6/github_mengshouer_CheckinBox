@@ -1,11 +1,18 @@
 import requests, json, time, os, re, sys
 sys.path.append('.')
 requests.packages.urllib3.disable_warnings()
+import logging
+logging.basicConfig(level=logging.INFO, format='%(message)s')
+logger = logging.getLogger(__name__)
 try:
     from pusher import pusher
 except:
     def pusher(*args):
         pass
+try:
+    from notify import send as pusher
+except:
+    logger.info("无青龙推送文件")
 
 cookie = os.environ.get("cookie_zhiyou")
 
@@ -33,14 +40,14 @@ def run(*args):
     url = "http://bbs.zhiyoo.net/plugin.php?id=dsu_paulsign:sign&operation=qiandao&infloat=1&inajax=1"
     payload=f'formhash={formhash}&qdxq=yl'
     r = s.post(url, data=payload, verify=False, timeout=120)
-    # print(r.text)
+    # logger.info(r.text)
     if '成功' in r.text:
         msg += re.compile(r'恭喜你签到成功!获得随机奖励 金币 \d+ 元.').search(r.text)[0]
     elif '已经签到' in r.text:
         msg += '您今日已经签到，请明天再来！'
     else:
         msg += '签到失败，可能是cookie失效了！'
-        pusher("智友邦  签到失败，可能是cookie失效了！！！", r.text[:200])
+        pusher("Checkinbox通知", f"智友邦  签到失败，可能是cookie失效了！！！\n{r.text[:200]}")
     return msg + '\n'
 
 def main(*args):
@@ -56,12 +63,12 @@ def main(*args):
         cookie = clist[i]
         msg += run(cookie)
         i += 1
-    print(msg[:-1])
+    logger.info(msg[:-1])
     return msg[:-1]
 
 
 if __name__ == "__main__":
     if cookie:
-        print("----------智友邦开始尝试签到----------")
+        logger.info("----------智友邦开始尝试签到----------")
         main()
-        print("----------智友邦签到执行完毕----------")
+        logger.info("----------智友邦签到执行完毕----------")

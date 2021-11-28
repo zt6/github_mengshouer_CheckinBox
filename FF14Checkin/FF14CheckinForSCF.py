@@ -6,11 +6,18 @@ import os
 import requests, sys
 sys.path.append('.')
 requests.packages.urllib3.disable_warnings()
+import logging
+logging.basicConfig(level=logging.INFO, format='%(message)s')
+logger = logging.getLogger(__name__)
 try:
     from pusher import pusher
 except:
     def pusher(*args):
         pass
+try:
+    from notify import send as pusher
+except:
+    logger.info("无青龙推送文件")
 
 headers = {
     "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3",
@@ -42,7 +49,7 @@ def __put_cookie(items):
 
 # 提交用户名和密码, 获取ticket
 def step1() -> str:
-    print("将以 %s 登录" % (login_name))
+    logger.info("将以 %s 登录" % (login_name))
     params = {
         "callback": "staticLogin_JSONPMethod",
         "inputUserId": login_name,
@@ -70,11 +77,11 @@ def step1() -> str:
     text = text[text.find("(") + 1: text.rfind(")")]
     obj = json.loads(text)
     if "ticket" in obj["data"]:
-        print("登录成功, 正在设置cookie...")
+        logger.info("登录成功, 正在设置cookie...")
         return obj["data"]["ticket"]
     else:
-        print("登录失败, 短期内登录失败次数过多, 服务器已开启验证码, 请在1-3天后再试...")
-        pusher("FF14签到出错", "登录失败, 短期内登录失败次数过多, 服务器已开启验证码, 请在1-3天后再试...")
+        logger.info("登录失败, 短期内登录失败次数过多, 服务器已开启验证码, 请在1-3天后再试...")
+        pusher("Checkinbox通知", "FF14签到出错", "登录失败, 短期内登录失败次数过多, 服务器已开启验证码, 请在1-3天后再试...")
         return None
 
 # 设置cookie
@@ -117,7 +124,7 @@ def step4(ticket: str):
     url = "http://act.ff.sdo.com/20180707jifen/Server/SDOLogin.ashx?returnPage=index.html&ticket=" + ticket
     r = requests.get(url, cookies=cookie)
     __put_cookie(r.cookies.items())
-    print("设置cookie成功...")
+    logger.info("设置cookie成功...")
 
 # 查询角色列表
 def step5() -> str:
@@ -139,13 +146,13 @@ def step5() -> str:
     obj = json.loads(text)
     attach = obj["Attach"]
     role = "{0}|{1}|{2}"
-    print("正在获取角色列表...")
+    logger.info("正在获取角色列表...")
     for r in attach:
         if r["worldnameZh"] == server_name and r["name"] == role_name:
-            print("获取角色列表成功...")
+            logger.info("获取角色列表成功...")
             return role.format(r["cicuid"], r["worldname"], r["groupid"])
-    print("获取角色列表失败...")
-    pusher("FF14签到出错", "获取角色列表失败...")
+    logger.info("获取角色列表失败...")
+    pusher("Checkinbox通知", "FF14签到出错", "获取角色列表失败...")
     return None
 
 # 选择区服及角色
@@ -168,11 +175,11 @@ def step6(role: str):
     }
     r = requests.post(url, params=params, cookies=cookie)
     __put_cookie(r.cookies.items())
-    print("已选择目标角色...")
+    logger.info("已选择目标角色...")
 
 # 签到
 def step7():
-    print("正在签到...")
+    logger.info("正在签到...")
     url = "http://act.ff.sdo.com/20180707jifen/Server/User.ashx"
     params = {
         "method": "signin",
@@ -180,9 +187,9 @@ def step7():
     }
     r = requests.post(url, params=params, cookies=cookie)
     obj = json.loads(r.text)
-    print(obj["Message"])
+    logger.info(obj["Message"])
     if obj["Message"] != "成功":
-        pusher("FF14签到出错", "签到失败...")
+        pusher("Checkinbox通知", "FF14签到出错签到失败...")
         return False
     return True
 
@@ -197,7 +204,7 @@ def step8():
     obj = json.loads(r.text)
     attach = obj["Attach"]
     jifen = json.loads(attach)["Jifen"]
-    print("当前积分为: %d" % jifen)
+    logger.info("当前积分为: %d" % jifen)
     return jifen
 
 def main(*arg):
@@ -248,13 +255,13 @@ def go(*arg):
             i += 1
     else:
         msg = "账号密码或其他参数个数不相符"
-        print(msg)
+        logger.info(msg)
     return msg
 
 
 if __name__ == "__main__":
     if login_name and login_password and area_name and server_name and role_name:
-        print("----------FF14积分商城开始尝试签到----------")
+        logger.info("----------FF14积分商城开始尝试签到----------")
         go()
-        print("----------FF14积分商城签到执行完毕----------")
+        logger.info("----------FF14积分商城签到执行完毕----------")
 

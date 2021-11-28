@@ -3,11 +3,18 @@
 import requests, json, time, os, sys
 sys.path.append('.')
 requests.packages.urllib3.disable_warnings()
+import logging
+logging.basicConfig(level=logging.INFO, format='%(message)s')
+logger = logging.getLogger(__name__)
 try:
     from pusher import pusher
 except:
     def pusher(*args):
         pass
+try:
+    from notify import send as pusher
+except:
+    logger.info("无青龙推送文件")
 
 cookie = os.environ.get("cookie_smzdm")
 
@@ -24,15 +31,15 @@ def main(*arg):
             'Referer': 'https://www.smzdm.com/'
             }
 
-        r = s.get(url, headers=headers, verify=False)
-        print(r.text.encode('latin-1').decode('unicode_escape'))
+        r = s.get(url, headers=headers, verify=False, timeout=10)
+        logger.info(r.text.encode('latin-1').decode('unicode_escape'))
         if r.json()["error_code"] != 0:
-            pusher("smzdm  Cookie过期", r.text[:200])
+            pusher("Checkinbox通知", f"smzdm  Cookie过期{r.text[:200]}")
             msg += "smzdm cookie失效"
         else:
             msg += "smzdm签到成功"
     except Exception as e:
-        print('repr(e):', repr(e))
+        logger.info('repr(e):', repr(e))
         msg += '运行出错,repr(e):'+repr(e)
     return msg + "\n"
 
@@ -53,8 +60,8 @@ def smzdm_pc(*arg):
 
 if __name__ == "__main__":
     if cookie:
-        print("----------什么值得买开始尝试签到----------")
+        logger.info("----------什么值得买开始尝试签到----------")
         smzdm_pc()
-        print("----------什么值得买签到执行完毕----------")
+        logger.info("----------什么值得买签到执行完毕----------")
 
     

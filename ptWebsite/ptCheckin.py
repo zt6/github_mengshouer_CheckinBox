@@ -11,6 +11,15 @@ except:
 
 cookie = os.environ.get("cookie_pt")
 pt_website = os.environ.get("pt_website")
+proxy_url_http = os.environ.get("proxy_url_http")
+proxy_url_https = os.environ.get("proxy_url_https")
+if proxy_url_http and proxy_url_https:
+    proxies = {
+        "http": proxy_url_http,
+        "https": proxy_url_https
+    }
+else:
+    proxies = None
 
 def main(cookie, website):
     try:
@@ -25,7 +34,7 @@ def main(cookie, website):
             'Referer': website,
             }
 
-        r = s.get(url, headers=headers, verify=False)
+        r = s.get(url, headers=headers, proxies=proxies, verify=False)
         award = re.compile(r'今天签到您获得\d+点魔力值').search(r.text)
         if award:
             msg = award.group(0)
@@ -39,12 +48,12 @@ def main(cookie, website):
                 msg = award.group(0)
             else:
                 msg = f"PT站点{website} Cookie过期"
-                pusher(f"PT站点{website} Cookie过期", r.text[:200])
+                pusher("Checkinbox通知", f"PT站点{website} Cookie过期\n{r.text[:200]}")
         elif 'value="已经打卡"' in r.text:
             msg = "已经签到过了！"
         else:
             msg = f"PT站点{website} Cookie过期"
-            pusher(f"PT站点{website} Cookie过期", r.text[:200])
+            pusher("Checkinbox通知", f"PT站点{website} Cookie过期\n{r.text[:200]}")
     except Exception as e:
         print('repr(e):', repr(e))
         msg = '运行出错,repr(e):'+repr(e)

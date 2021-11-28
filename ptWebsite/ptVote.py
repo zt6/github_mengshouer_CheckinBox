@@ -3,14 +3,30 @@
 import requests, os, sys, json
 sys.path.append('.')
 requests.packages.urllib3.disable_warnings()
+import logging
+logging.basicConfig(level=logging.INFO, format='%(message)s')
+logger = logging.getLogger(__name__)
 try:
     from pusher import pusher
 except:
     def pusher(*args):
         pass
+try:
+    from notify import send as pusher
+except:
+    logger.info("无青龙推送文件")
 
 cookie = os.environ.get("cookie_pt")
 pt_website = os.environ.get("pt_website")
+proxy_url_http = os.environ.get("proxy_url_http")
+proxy_url_https = os.environ.get("proxy_url_https")
+if proxy_url_http and proxy_url_https:
+    proxies = {
+        "http": proxy_url_http,
+        "https": proxy_url_https
+    }
+else:
+    proxies = None
 
 def main(cookie, website):
     s = requests.Session()
@@ -39,9 +55,9 @@ def main(cookie, website):
                 json.dump(data, f, ensure_ascii=False)
             return f"{website} 投票初始化，自行修改起始投票id才会开始投票\n"
         except:
-            msg = "warning::: 无法写入ptconfig.json,请使用有读写权限的环境运行脚本\n"
-            print(msg)
-            pusher(msg, msg)
+            msg = "warning::: ptVote.py无法写入ptconfig.json,请使用有读写权限的环境运行脚本\n"
+            logger.info(msg)
+            pusher("Checkinbox通知", msg)
             return msg
     url = f'{website.replace("index.php", "fun.php")}?action=vote&id={vote_id}&yourvote=fun'
 
@@ -52,7 +68,7 @@ def main(cookie, website):
             'Referer': website,
             }
 
-    r = s.get(url, headers=headers, verify=False)
+    r = s.get(url, headers=headers, proxies=proxies, verify=False)
     data[website]["vote_id"] = int(vote_id) + 1
     if not r.text:
         msg = "趣味盒投票有趣"
@@ -66,7 +82,7 @@ def main(cookie, website):
         msg = "无效的ID"
     else:
         msg = "cookie失效"
-        pusher(f"PT站点{website} Cookie过期", r.text[:200])
+        pusher("Checkinbox通知", f"PT站点{website} Cookie过期\n{r.text[:200]}")
     return msg + '\n'
 
 def main_handler(*args):
@@ -89,6 +105,6 @@ def main_handler(*args):
 
 if __name__ == "__main__":
     if cookie:
-        print("----------PTwebsite_Vote开始尝试签到----------")
-        print(main_handler())
-        print("----------PTwebsite_Vote签到执行完毕----------")
+        logger.info("----------PTwebsite_Vote开始尝试签到----------")
+        logger.info(main_handler())
+        logger.info("----------PTwebsite_Vote签到执行完毕----------")

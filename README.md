@@ -8,7 +8,7 @@
 
 - [什么值得买网页每日签到](https://github.com/mengshouer/CheckinBox/tree/master/smzdmCheckin)
 
-- [52pojie每日签到+免费评分](https://github.com/mengshouer/CheckinBox/tree/master/Checkin52pj)
+- [52pojie ~~每日签到~~ + 免费评分](https://github.com/mengshouer/CheckinBox/tree/master/Checkin52pj)
 
 - [网易云音乐每日签到与刷歌单](https://github.com/mengshouer/CheckinBox/tree/master/NetEase_Music_daily)
 
@@ -33,6 +33,31 @@
 
 </details>
 
+<details>
+  <summary>青龙运行方式</summary>
+
+`docker exec -it qinglong bash` 进入容器
+
+`python3 -m pip config set global.index-url https://mirrors.aliyun.com/pypi/simple/`  更换pip源为阿里云的源
+
+`python3 -m pip install --upgrade pip`  更新pip(吐了，没更新装不上cryptography)
+
+`apk add --no-cache rust cargo libxml2 libxslt libxml2-dev libxslt-dev` 安装依赖
+
+在青龙面板添加一个任务并运行一次，后续自动更新依赖
+
+`task python3 -m pip install -r https://ghproxy.com/https://raw.githubusercontent.com/mengshouer/CheckinBox/master/requirements.txt`
+
+`ql repo https://github.com/mengshouer/CheckinBox.git "" "PusherTest|pusher"` 拉取仓库
+
+之后在环境变量里面添加需要运行的脚本的环境，具体需要的环境变量看脚本目录的说明
+
+定时使用的是青龙拉取脚本时默认的定时规则，自行修改。
+
+推送使用的是青龙自带的推送脚本。
+
+</details>
+
 ### [腾讯云函数SCF](https://console.cloud.tencent.com/scf/index)的版本<br>
 ### SCF计费问题：如果不是大量跑脚本的话，达不到收费标准的，如果不放心的话可以查询[账单详细](https://console.cloud.tencent.com/expense/bill/summary?businessCode=p_scf)<br>
 ### 实际从账户扣费时按2位小数进行扣费（即扣到分）,账单详细可以看到8位小数<br>
@@ -48,7 +73,7 @@ value内输入：1.登录手机号 2.登录密码 3.推送服务设置值(可选
 <details>
   <summary>多账号设置</summary>
 
-Github Actions版本直接Secrets内多账号时账号密码一行一个一一对应<br>
+青龙和Github Actions版本直接Secrets内多账号时账号密码一行一个一一对应<br>
 腾讯云函数SCF在每个账号和密码后面添加\n，账号密码也是一一对应<br>
 无多Server酱推送<br>
 
@@ -88,5 +113,20 @@ PS. 如果未设置pull.yml配置文件，则mergeMethod的规则默认为none(�
 1. 先完成基础使用后，在.github目录下(创建/修改)文件pull.yml<br>
 2. 参考[插件使用文档](https://github.com/wei/pull#advanced-setup-with-config)进行修改<br>
 PS.强制远程分支覆盖自己的分支只需要将mergeMethod的值修改为hardreset
+
+</details>
+
+<details>
+  <summary>代理设置</summary>
+
+V2EX，pt站点，恩山论坛可能国内节点有时候会无法访问，所以需要代理
+
+环境变量添加：
+
+Key: proxy_url_http --> Value: http的代理地址，例如:http://127.0.0.1:7890
+
+Key: proxy_url_https --> Value: https的代理地址，例如:https://xxxxx
+
+http的地址可以用于https，要使用代理必须两个都填
 
 </details>

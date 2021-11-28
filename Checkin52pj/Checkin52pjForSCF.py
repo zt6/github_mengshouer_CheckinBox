@@ -3,12 +3,20 @@
 import requests, os, sys, re
 sys.path.append('.')
 requests.packages.urllib3.disable_warnings()
+from bs4 import BeautifulSoup
+import logging
+logging.basicConfig(level=logging.INFO, format='%(message)s')
+logger = logging.getLogger(__name__)
 try:
     from pusher import pusher
 except:
     def pusher(*args):
         pass
-from bs4 import BeautifulSoup
+try:
+    from notify import send as pusher
+except:
+    logger.info("无青龙推送文件")
+
 
 cookie = os.environ.get('cookie_52pj')
 pj_rate = os.environ.get('rate_52pj')
@@ -29,18 +37,18 @@ def main(*args):
         c = b.find('div',id='messagetext').find('p').text
 
         if "您需要先登录才能继续本操作"  in c:
-            pusher("52pojie  Cookie过期", c)
+            pusher("Checkinbox通知", f"52pojie  Cookie过期\n{c}")
             msg += "cookie_52pj失效，需重新获取"
         elif "恭喜"  in c:
             msg += "52pj签到成功"
         elif "不是进行中的任务" in c:
             msg += "不是进行中的任务"
         else:
-            print(c)
+            logger.info(c)
     except:
         msg += "52pj出错,大概率是触发52pj安全防护，访问出错。自行修改脚本运行时间和次数，总有能访问到的时间"
         msg += "\n如果错误需要推送的话，自行去掉代码内的注释"
-        #pusher("52pojie  访问出错", b)
+        #pusher("Checkinbox通知", f"52pojie  访问出错{b}")
     return msg + "\n"
 
 
@@ -57,7 +65,7 @@ def pjRate(*args):
             url = f'https://www.52pojie.cn/forum.php?mod=viewthread&tid={tid}'
             r = s.get(url, headers=headers)
             if "需要登录" in r.text:
-                pusher("52pojie  Cookie过期")
+                pusher("Checkinbox通知", "52pojie  Cookie过期")
                 msg += "cookie_52pj失效，需重新获取"
                 break
             formhash = re.findall("formhash=\w+", r.text)[0][9:]
@@ -85,7 +93,7 @@ def pjRate(*args):
                 msg += re.findall("errorhandle_rate\('.*'", r.text)[0][18:-1]
                 msg += "\n"
     except:
-        # pusher("52pojie  免费评分失败")
+        # pusher("Checkinbox通知", "52pojie  免费评分失败")
         pass
     return msg + "\n"
 
@@ -101,15 +109,15 @@ def pjCheckin(*args):
     while i < len(clist):
         msg += f"第 {i+1} 个账号开始执行任务\n"
         cookie = clist[i]
-        msg += main()
+        # msg += main()
         if pj_rate:
             msg += pjRate()
         i += 1
-    print(msg[:-1])
+    logger.info(msg[:-1])
     return msg
 
 if __name__ == "__main__":
     if cookie:
-        print("----------52pojie开始尝试签到----------")
+        logger.info("----------52pojie开始尝试签到----------")
         pjCheckin()
-        print("----------52pojie签到执行完毕----------")
+        logger.info("----------52pojie签到执行完毕----------")

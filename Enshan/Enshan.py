@@ -1,14 +1,30 @@
 import requests, json, time, os, sys
 sys.path.append('.')
 requests.packages.urllib3.disable_warnings()
+from lxml import etree
+import logging
+logging.basicConfig(level=logging.INFO, format='%(message)s')
+logger = logging.getLogger(__name__)
 try:
     from pusher import pusher
 except:
     def pusher(*args):
         pass
-from lxml import etree
+try:
+    from notify import send as pusher
+except:
+    logger.info("无青龙推送文件")
 
 cookie = os.environ.get("cookie_enshan")
+proxy_url_http = os.environ.get("proxy_url_http")
+proxy_url_https = os.environ.get("proxy_url_https")
+if proxy_url_http and proxy_url_https:
+    proxies = {
+        "http": proxy_url_http,
+        "https": proxy_url_https
+    }
+else:
+    proxies = None
 
 def run(*arg):
     msg = ""
@@ -28,15 +44,15 @@ def run(*arg):
         'Cookie': cookie
     }
     try:
-        r = s.get(url, headers=headers, timeout=120)
-        # print(r.text)
+        r = s.get(url, headers=headers, proxies=proxies, timeout=120)
+        # logger.info(r.text)
         if '每天登录' in r.text:
             h = etree.HTML(r.text)
             data = h.xpath('//tr/td[6]/text()')
             msg += f'签到成功或今日已签到，最后签到时间：{data[0]}'
         else:
             msg += '恩山论坛签到失败，可能是cookie失效了！'
-            pusher(msg)
+            pusher("Checkinbox通知", msg)
     except:
         msg = '无法正常连接到网站，请尝试改变网络环境，试下本地能不能跑脚本，或者换几个时间点执行脚本'
     return msg + '\n'
@@ -54,12 +70,12 @@ def main(*arg):
         cookie = clist[i]
         msg += run(cookie)
         i += 1
-    print(msg[:-1])
+    logger.info(msg[:-1])
     return msg[:-1]
 
 
 if __name__ == "__main__":
     if cookie:
-        print("----------恩山论坛开始尝试签到----------")
+        logger.info("----------恩山论坛开始尝试签到----------")
         main()
-        print("----------恩山论坛签到执行完毕----------")
+        logger.info("----------恩山论坛签到执行完毕----------")
