@@ -1,17 +1,21 @@
 # -*- coding: utf8 -*-
 
 import requests, os, sys, re
-sys.path.append('.')
+
+sys.path.append(".")
 requests.packages.urllib3.disable_warnings()
 try:
     from pusher import pusher
 except:
+
     def pusher(*args):
         pass
+
+
 from bs4 import BeautifulSoup
 
-cookie = os.environ.get('cookie_52pj')
-pj_rate = os.environ.get('rate_52pj')
+cookie = os.environ.get("cookie_52pj")
+pj_rate = os.environ.get("rate_52pj")
 
 s = requests.session()
 headers = {
@@ -19,14 +23,11 @@ headers = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.198 Safari/537.36",
 }
 
+
 def main(*args):
     msg = ""
-    s.put(
-        "https://www.52pojie.cn/home.php?mod=task&do=apply&id=2", headers=headers
-    )
-    r = s.put(
-        "https://www.52pojie.cn/home.php?mod=task&do=draw&id=2", headers=headers
-    )
+    s.put("https://www.52pojie.cn/home.php?mod=task&do=apply&id=2", headers=headers)
+    r = s.put("https://www.52pojie.cn/home.php?mod=task&do=draw&id=2", headers=headers)
     br = BeautifulSoup(r.text, "html.parser")
     text = br.find("div", id="messagetext").find("p").text
     if "您需要先登录才能继续本操作" in text:
@@ -50,7 +51,7 @@ def pjRate(*args):
         for tid in tidlist:
             tid = tid[4:]
             # 获取评分所需信息
-            url = f'https://www.52pojie.cn/forum.php?mod=viewthread&tid={tid}'
+            url = f"https://www.52pojie.cn/forum.php?mod=viewthread&tid={tid}"
             r = s.get(url, headers=headers)
             if "需要登录" in r.text:
                 pusher("52pojie  Cookie过期")
@@ -66,10 +67,10 @@ def pjRate(*args):
                 "handlekey": "rate",
                 "score2": "1",
                 "score6": "1",
-                "reason": "热心回复！".encode("GBK")
+                "reason": "热心回复！".encode("GBK"),
             }
             # 免费评分
-            rateurl = 'https://www.52pojie.cn/forum.php?mod=misc&action=rate&ratesubmit=yes&infloat=yes&inajax=1'
+            rateurl = "https://www.52pojie.cn/forum.php?mod=misc&action=rate&ratesubmit=yes&infloat=yes&inajax=1"
             r = s.post(rateurl, headers=headers, data=data)
             if "succeedhandle_rate" in r.text:
                 msg += re.findall("succeedhandle_rate\('.*'", r.text)[0][19:]
@@ -104,6 +105,7 @@ def pjCheckin(*args):
         i += 1
     print(msg[:-1])
     return msg
+
 
 if __name__ == "__main__":
     if cookie:

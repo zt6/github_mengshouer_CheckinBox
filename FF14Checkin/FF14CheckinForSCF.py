@@ -4,16 +4,21 @@ import json
 import time
 import os
 import requests, sys
-sys.path.append('.')
+
+sys.path.append(".")
 requests.packages.urllib3.disable_warnings()
 import logging
-logging.basicConfig(level=logging.INFO, format='%(message)s')
+
+logging.basicConfig(level=logging.INFO, format="%(message)s")
 logger = logging.getLogger(__name__)
 try:
     from pusher import pusher
 except:
+
     def pusher(*args):
         pass
+
+
 try:
     from notify import send as pusher
 except:
@@ -43,9 +48,11 @@ role_name = os.environ.get("role_name")
 global cookie
 cookie = {}
 
+
 def __put_cookie(items):
     for item in items:
         cookie.setdefault(item[0], item[1])
+
 
 # 提交用户名和密码, 获取ticket
 def step1() -> str:
@@ -74,7 +81,7 @@ def step1() -> str:
     r = requests.get(url, params=params, headers=headers)
     __put_cookie(r.cookies.items())
     text = r.text
-    text = text[text.find("(") + 1: text.rfind(")")]
+    text = text[text.find("(") + 1 : text.rfind(")")]
     obj = json.loads(text)
     if "ticket" in obj["data"]:
         logger.info("登录成功, 正在设置cookie...")
@@ -83,6 +90,7 @@ def step1() -> str:
         logger.info("登录失败, 短期内登录失败次数过多, 服务器已开启验证码, 请在1-3天后再试...")
         pusher("Checkinbox通知", "FF14签到出错", "登录失败, 短期内登录失败次数过多, 服务器已开启验证码, 请在1-3天后再试...")
         return None
+
 
 # 设置cookie
 def step2():
@@ -95,6 +103,7 @@ def step2():
     }
     r = requests.get(url, params=params, cookies=cookie)
     __put_cookie(r.cookies.items())
+
 
 # 设置cookie
 def step3():
@@ -119,12 +128,17 @@ def step3():
     r = requests.get(url, params=params, cookies=cookie)
     __put_cookie(r.cookies.items())
 
+
 # 设置cookie
 def step4(ticket: str):
-    url = "http://act.ff.sdo.com/20180707jifen/Server/SDOLogin.ashx?returnPage=index.html&ticket=" + ticket
+    url = (
+        "http://act.ff.sdo.com/20180707jifen/Server/SDOLogin.ashx?returnPage=index.html&ticket="
+        + ticket
+    )
     r = requests.get(url, cookies=cookie)
     __put_cookie(r.cookies.items())
     logger.info("设置cookie成功...")
+
 
 # 查询角色列表
 def step5() -> str:
@@ -155,6 +169,7 @@ def step5() -> str:
     pusher("Checkinbox通知", "FF14签到出错", "获取角色列表失败...")
     return None
 
+
 # 选择区服及角色
 def step6(role: str):
     url = "http://act.ff.sdo.com/20180707jifen/Server/ff14/HGetRoleList.ashx"
@@ -177,14 +192,12 @@ def step6(role: str):
     __put_cookie(r.cookies.items())
     logger.info("已选择目标角色...")
 
+
 # 签到
 def step7():
     logger.info("正在签到...")
     url = "http://act.ff.sdo.com/20180707jifen/Server/User.ashx"
-    params = {
-        "method": "signin",
-        "i": "0.855755357775076"
-    }
+    params = {"method": "signin", "i": "0.855755357775076"}
     r = requests.post(url, params=params, cookies=cookie)
     obj = json.loads(r.text)
     logger.info(obj["Message"])
@@ -193,19 +206,18 @@ def step7():
         return False
     return True
 
+
 # 查询当前积分
 def step8():
     url = "http://act.ff.sdo.com/20180707jifen/Server/User.ashx"
-    params = {
-        "method": "querymystatus",
-        "i": "0.855755357775076"
-    }
+    params = {"method": "querymystatus", "i": "0.855755357775076"}
     r = requests.post(url, params=params, cookies=cookie)
     obj = json.loads(r.text)
     attach = obj["Attach"]
     jifen = json.loads(attach)["Jifen"]
     logger.info("当前积分为: %d" % jifen)
     return jifen
+
 
 def main(*arg):
     ticket = step1()
@@ -225,6 +237,7 @@ def main(*arg):
         return jifen
     else:
         return "签到失败..."
+
 
 def go(*arg):
     msg = ""
@@ -264,4 +277,3 @@ if __name__ == "__main__":
         logger.info("----------FF14积分商城开始尝试签到----------")
         go()
         logger.info("----------FF14积分商城签到执行完毕----------")
-
