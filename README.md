@@ -93,6 +93,9 @@ Github Actions添加在Setting→Secrets→New secrets，腾讯云函数SCF设�
 7. Key: tg_token --> Value: Telegram bot的Token，Telegram机器人通知推送必填项<br>
 8. Key: tg_chatid --> Value: 接收通知消息的Telegram用户的id，Telegram机器人通知推送必填项<br>
 9. Key: tg_api_host --> Value: Telegram api自建的反向代理地址(不懂忽略此项)，默认tg官方api=api.telegram.org<br>
+10. Key: smtp_host smtp_port smtp_user smtp_pass smtp_sender smtp_receiver 使用SMTP邮箱推送<br>
+10. Value: 邮件的服务器，端口，用户，密码，发送者，接受者<br>
+11. Key: QYWX_AM 企业微信应用消息通知，具体参数看pusher.py<br>
 PS:腾讯云函数SCF的默认无推送，需要推送的话需要将[pusher.py](https://github.com/mengshouer/CheckinBox/blob/master/pusher.py)内的内容直接复制到所需函数的代码最上方！！！
 #### 一切提醒都是报错提醒，没问题不提醒
 
