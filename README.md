@@ -40,11 +40,11 @@
 
 `python3 -m pip config set global.index-url https://mirrors.aliyun.com/pypi/simple/`  更换pip源为阿里云的源
 
-`python3 -m pip install --upgrade pip`  更新pip才能直接安装成功
+`python3 -m pip install --upgrade pip`  更新pip
 
-在青龙面板添加一个任务并运行一次，后续自动更新依赖
+`apk add python3-dev libffi-dev`  安装解密库依赖
 
-`task python3 -m pip install -r https://ghproxy.com/https://raw.githubusercontent.com/mengshouer/CheckinBox/master/requirements.txt`
+`python3 -m pip install -r https://ghproxy.com/https://raw.githubusercontent.com/mengshouer/CheckinBox/master/requirements.txt`
   
  如果上面安装依赖报错，跑一边`apk add --no-cache rust cargo libxml2 libxslt libxml2-dev libxslt-dev`再安装一次
 
