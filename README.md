@@ -42,11 +42,11 @@
 
 `python3 -m pip install --upgrade pip`  更新pip
 
-`apk add python3-dev libffi-dev`  安装解密库依赖
+`apk add python3-dev libffi-dev gcc libc6-compat g++`  安装解密库依赖
 
 `python3 -m pip install -r https://ghproxy.com/https://raw.githubusercontent.com/mengshouer/CheckinBox/master/requirements.txt`
   
- 如果上面安装依赖报错，跑一边`apk add --no-cache rust cargo libxml2 libxslt libxml2-dev libxslt-dev`再安装一次
+ 如果上面安装依赖报错，跑一边`apk add --no-cache cargo libxml2 libxslt libxml2-dev libxslt-dev`再安装一次
 
 `ql repo https://github.com/mengshouer/CheckinBox.git "" "PusherTest|pusher"` 拉取仓库
 
